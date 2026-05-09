@@ -28,9 +28,9 @@ jobs:
 
           CLIENT_ID = "1950a258-227b-4e31-a9cf-717495945fc2"
           TENANT_ID = "e4bd69ff-e6f7-4c2e-b247-41b54ba2490e"
-          REPORT_ID = "a08e18e6-c582-47ca-bdcf-0f9bc4a376c9"
+          REPORT_ID = "4213d990-9e03-4343-a4bb-48a05b9e8c5c"
           GROUP_ID  = "d7170e97-9863-4a0a-98c2-8490bbb6cd2c"
-          EMBED_URL = "https://app.powerbi.com/reportEmbed?reportId=a08e18e6-c582-47ca-bdcf-0f9bc4a376c9&groupId=d7170e97-9863-4a0a-98c2-8490bbb6cd2c&w=2&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLU5PUlRILUVVUk9QRS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldCIsImVtYmVkRmVhdHVyZXMiOnsidXNhZ2VNZXRyaWNzVk5leHQiOnRydWV9fQ%3d%3d"
+          EMBED_URL = "https://app.powerbi.com/reportEmbed?reportId=4213d990-9e03-4343-a4bb-48a05b9e8c5c&groupId=d7170e97-9863-4a0a-98c2-8490bbb6cd2c&w=2&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLU5PUlRILUVVUk9QRS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldCIsImVtYmVkRmVhdHVyZXMiOnsidXNhZ2VNZXRyaWNzVk5leHQiOnRydWV9fQ%3d%3d"
 
           app = msal.PublicClientApplication(CLIENT_ID, authority=f"https://login.microsoftonline.com/{TENANT_ID}")
           result = app.acquire_token_by_refresh_token(
