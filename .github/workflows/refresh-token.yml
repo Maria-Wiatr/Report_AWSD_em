@@ -1,0 +1,61 @@
+name: Refresh Power BI Embed Token
+
+on:
+  schedule:
+    - cron: '*/55 * * * *'
+  workflow_dispatch:
+
+jobs:
+  refresh-token:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - run: pip install msal requests
+
+      - name: Generate embed token
+        env:
+          POWERBI_REFRESH_TOKEN: ${{ secrets.POWERBI_REFRESH_TOKEN }}
+        run: |
+          python3 << 'EOF'
+          import msal, requests, json, os
+
+          CLIENT_ID = "1950a258-227b-4e31-a9cf-717495945fc2"
+          TENANT_ID = "e4bd69ff-e6f7-4c2e-b247-41b54ba2490e"
+          REPORT_ID = "4213d990-9e03-4343-a4bb-48a05b9e8c5c"
+          GROUP_ID  = "d7170e97-9863-4a0a-98c2-8490bbb6cd2c"
+          EMBED_URL = "https://app.powerbi.com/reportEmbed?reportId=4213d990-9e03-4343-a4bb-48a05b9e8c5c&groupId=d7170e97-9863-4a0a-98c2-8490bbb6cd2c&w=2&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLU5PUlRILUVVUk9QRS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldCIsImVtYmVkRmVhdHVyZXMiOnsidXNhZ2VNZXRyaWNzVk5leHQiOnRydWV9fQ%3d%3d"
+
+          app = msal.PublicClientApplication(CLIENT_ID, authority=f"https://login.microsoftonline.com/{TENANT_ID}")
+          result = app.acquire_token_by_refresh_token(
+              os.environ["POWERBI_REFRESH_TOKEN"],
+              scopes=["https://analysis.windows.net/powerbi/api/user_impersonation"]
+          )
+
+          if "access_token" not in result:
+              raise Exception(f"Token refresh failed: {result.get('error_description')}")
+
+          resp = requests.post(
+              f"https://api.powerbi.com/v1.0/myorg/groups/{GROUP_ID}/reports/{REPORT_ID}/GenerateToken",
+              headers={"Authorization": f"Bearer {result['access_token']}", "Content-Type": "application/json"},
+              json={"accessLevel": "View"}
+          )
+
+          data = resp.json()
+          with open("token.json", "w") as f:
+              json.dump({"token": data["token"], "embedUrl": EMBED_URL, "reportId": REPORT_ID}, f)
+
+          print("Token generated successfully")
+          EOF
+
+      - name: Commit and push token
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add token.json
+          git diff --staged --quiet || git commit -m "Refresh embed token"
+          git push
