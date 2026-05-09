@@ -20,9 +20,15 @@
     <div id="reportContainer"></div>
 
     <script>
+        var models = window['powerbi-client'].models;
+
         fetch('token.json')
-            .then(r => r.json())
-            .then(data => {
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data.token) {
+                    document.getElementById('loading').textContent = 'Token not ready yet — please wait a minute and refresh.';
+                    return;
+                }
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('reportContainer').style.display = 'block';
                 powerbi.embed(document.getElementById('reportContainer'), {
@@ -39,8 +45,8 @@
                     }
                 });
             })
-            .catch(err => {
-                document.getElementById('loading').textContent = 'Error loading report: ' + err.message;
+            .catch(function(err) {
+                document.getElementById('loading').textContent = 'Error: ' + err.message;
             });
     </script>
 </body>
