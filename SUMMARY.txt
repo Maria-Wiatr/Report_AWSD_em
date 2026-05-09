@@ -1,0 +1,108 @@
+================================================================================
+POWER BI PUBLIC DASHBOARD - SUMMARY
+Report: Report_AWSD_Maria_Wiatr
+Created: May 2026
+================================================================================
+
+PUBLIC LINK (share this with anyone)
+--------------------------------------
+https://maria-wiatr.github.io/Report_AWSD_em/
+
+No login required. Works in any browser. No Power BI account needed.
+
+
+HOW IT WORKS
+--------------------------------------
+1. A GitHub Action runs every 55 minutes automatically
+2. It uses your credentials to generate a Power BI embed token
+3. The token is saved to token.json in the repository
+4. The public webpage loads the token and renders the report
+5. The report runs on your Azure A1 Embedded Capacity (reportem)
+
+
+KEY RESOURCES
+--------------------------------------
+GitHub Repository  : https://github.com/Maria-Wiatr/Report_AWSD_em
+GitHub Actions     : https://github.com/Maria-Wiatr/Report_AWSD_em/actions
+Power BI Workspace : AWSD (d7170e97-9863-4a0a-98c2-8490bbb6cd2c)
+Current Report     : Report_AWSD_Maria_Wiatr (a08e18e6-c582-47ca-bdcf-0f9bc4a376c9)
+Azure Capacity     : reportem (A1, Italy North, Azure for Students subscription)
+Azure Resource Grp : report
+
+
+WHAT RUNS AUTOMATICALLY (no action needed)
+--------------------------------------
+- Token refresh every 55 minutes via GitHub Actions
+- GitHub Pages serves the dashboard 24/7
+- Free GitHub Actions minutes are more than enough (~800 min/month used)
+
+
+WHAT REQUIRES YOUR ATTENTION
+--------------------------------------
+
+1. REFRESH TOKEN EXPIRY (~August 2026, every ~90 days)
+   - The GitHub Action will show a red X at:
+     https://github.com/Maria-Wiatr/Report_AWSD_em/actions
+   - The dashboard will go blank
+   - To fix: run this in Azure Cloud Shell:
+
+     python3 -c "
+     import sys; sys.path.insert(0, '/home/maria/.local/lib/python3.12/site-packages')
+     import msal
+     app = msal.PublicClientApplication('1950a258-227b-4e31-a9cf-717495945fc2', authority='https://login.microsoftonline.com/e4bd69ff-e6f7-4c2e-b247-41b54ba2490e')
+     flow = app.initiate_device_flow(scopes=['https://analysis.windows.net/powerbi/api/user_impersonation'])
+     print('Go to:', flow['verification_uri'])
+     print('Enter code:', flow['user_code'])
+     result = app.acquire_token_by_device_flow(flow)
+     print('NEW REFRESH TOKEN:', result.get('refresh_token', 'FAILED'))
+     "
+
+   - Then update the GitHub Secret:
+     Go to: https://github.com/Maria-Wiatr/Report_AWSD_em/settings/secrets/actions
+     Edit: POWERBI_REFRESH_TOKEN
+     Paste the new token and save
+
+2. AZURE CAPACITY COST
+   - The A1 capacity costs ~$735/month if running 24/7
+   - You have Azure for Students credits ($100 total)
+   - PAUSE the capacity when not needed:
+     portal.azure.com -> Resource Groups -> report -> reportem -> Pause
+   - RESUME before sharing the link:
+     portal.azure.com -> Resource Groups -> report -> reportem -> Resume
+   - Dashboard takes ~2 minutes to come back after resuming
+
+3. CHANGING THE REPORT
+   - To point to a different report, update REPORT_ID and EMBED_URL
+     in: .github/workflows/refresh-token.yml
+   - Then run the workflow manually from GitHub Actions
+
+
+SWITCHING TO A DIFFERENT REPORT
+--------------------------------------
+1. Get the report URL from Power BI Service
+   Example: https://app.powerbi.com/groups/GROUP_ID/reports/REPORT_ID
+2. Open .github/workflows/refresh-token.yml
+3. Change REPORT_ID and EMBED_URL values
+4. Push to GitHub
+5. Run the workflow manually once
+
+
+ARCHITECTURE OVERVIEW
+--------------------------------------
+[Power BI Service] <-- [GitHub Action (every 55 min)] --> [token.json]
+       |                         |
+   [A1 Capacity]         [GitHub Secrets]
+                                 |
+                         [GitHub Pages] <-- [Anyone with the link]
+
+
+IMPORTANT NOTES
+--------------------------------------
+- The embed token in token.json is public (anyone can see it in the repo)
+  but it only allows VIEWING the report, not editing data
+- Each token expires after ~1 hour, which is why the Action refreshes it
+- The refresh token in GitHub Secrets is private and never exposed publicly
+- If your university password changes, the refresh token will stop working
+  and you will need to generate a new one (same process as above)
+
+================================================================================
