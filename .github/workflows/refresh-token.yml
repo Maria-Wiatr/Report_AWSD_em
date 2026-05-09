@@ -48,6 +48,9 @@ jobs:
           )
 
           data = resp.json()
+          print("API response:", json.dumps(data))
+          if "token" not in data:
+              raise Exception(f"GenerateToken failed: {json.dumps(data)}")
           with open("token.json", "w") as f:
               json.dump({"token": data["token"], "embedUrl": EMBED_URL, "reportId": REPORT_ID}, f)
 
