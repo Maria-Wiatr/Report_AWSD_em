@@ -20,13 +20,11 @@
     <div id="reportContainer"></div>
 
     <script>
-        var models = window['powerbi-client'].models;
-
         fetch('token.json')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (!data.token) {
-                    document.getElementById('loading').textContent = 'Token not ready yet — please wait a minute and refresh.';
+                    document.getElementById('loading').textContent = 'Token not ready — refresh in 1 minute.';
                     return;
                 }
                 document.getElementById('loading').style.display = 'none';
@@ -36,7 +34,7 @@
                     id: data.reportId,
                     embedUrl: data.embedUrl,
                     accessToken: data.token,
-                    tokenType: models.TokenType.Embed,
+                    tokenType: 1,
                     settings: {
                         panes: {
                             filters: { visible: true },
