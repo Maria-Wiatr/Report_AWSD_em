@@ -61,6 +61,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
+          git pull --rebase
           git add token.json
           git diff --staged --quiet || git commit -m "Refresh embed token"
-          git pull --rebase && git push
+          git push
