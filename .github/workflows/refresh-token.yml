@@ -2,7 +2,7 @@ name: Refresh Power BI Embed Token
 
 on:
   schedule:
-    - cron: '*/55 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
